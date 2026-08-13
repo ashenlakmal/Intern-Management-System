@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core'; // Added ChangeDetectorRef
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
@@ -16,34 +16,38 @@ export class Interns implements OnInit {
   isSidebarCollapsed = false;
   internsList: any[] = [];
 
-  // Modal states
   isAddModalOpen = false;
   isViewModalOpen = false;
 
-  // Form objects
-  // Updated object with 'designation' instead of 'role'
   newIntern: any = { firstName: '', lastName: '', email: '', designation: 'Frontend Developer', department: '', status: 'Active' };
   selectedIntern: any = null;
   isEditMode = false;
 
   constructor(
     private internService: InternService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private cdr: ChangeDetectorRef // Injected ChangeDetectorRef to force UI updates
   ) { }
 
   ngOnInit() {
     this.loadInterns();
   }
 
-  // Fetches real data from the database
   loadInterns() {
     this.internService.getAllInterns().subscribe({
-      next: (data) => this.internsList = data,
-      error: (err) => this.toastr.error('Failed to load interns data', 'Error')
+      next: (data) => {
+        this.internsList = data;
+        // Forces Angular to update the HTML table immediately!
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.toastr.error('Failed to load interns data', 'Error');
+        console.error(err);
+      }
     });
   }
 
-  // Add Modal logic
+  // --- Add Modal Logic ---
   openAddModal() {
     this.newIntern = { firstName: '', lastName: '', email: '', designation: 'Frontend Developer', department: '', status: 'Active' };
     this.isAddModalOpen = true;
@@ -51,25 +55,27 @@ export class Interns implements OnInit {
 
   closeAddModal() {
     this.isAddModalOpen = false;
+    this.cdr.detectChanges(); // Force UI update
   }
 
   saveNewIntern() {
     this.internService.addIntern(this.newIntern).subscribe({
       next: (res) => {
-        // setTimeout ensures Angular updates the UI state immediately
-        setTimeout(() => {
-          this.isAddModalOpen = false;
-          this.loadInterns();
-          this.toastr.success('New intern added successfully', 'Success');
-        });
+        this.isAddModalOpen = false; // Close the modal
+        this.toastr.success('New intern added successfully', 'Success');
+        this.loadInterns(); // Refresh the table
+        this.cdr.detectChanges(); // Force Angular to apply these changes immediately!
       },
-      error: (err) => this.toastr.error('Failed to add intern', 'Error')
+      error: (err) => {
+        this.toastr.error('Failed to add intern', 'Error');
+        console.error(err);
+      }
     });
   }
 
-  // View/Edit Modal logic
+  // --- View/Edit Modal Logic ---
   openViewModal(intern: any) {
-    this.selectedIntern = { ...intern }; // Create a copy to avoid immediate mutation
+    this.selectedIntern = { ...intern };
     this.isEditMode = false;
     this.isViewModalOpen = true;
   }
@@ -77,6 +83,7 @@ export class Interns implements OnInit {
   closeViewModal() {
     this.isViewModalOpen = false;
     this.selectedIntern = null;
+    this.cdr.detectChanges(); // Force UI update
   }
 
   toggleEditMode() {
@@ -86,18 +93,19 @@ export class Interns implements OnInit {
   saveUpdatedIntern() {
     this.internService.updateIntern(this.selectedIntern.id, this.selectedIntern).subscribe({
       next: (res) => {
-        setTimeout(() => {
-          this.isEditMode = false;
-          this.isViewModalOpen = false;
-          this.loadInterns();
-          this.toastr.success('Intern details updated successfully', 'Success');
-        });
+        this.isEditMode = false;
+        this.isViewModalOpen = false; // Close the modal
+        this.toastr.success('Intern details updated successfully', 'Success');
+        this.loadInterns(); // Refresh the table
+        this.cdr.detectChanges(); // Force Angular to apply these changes immediately!
       },
-      error: (err) => this.toastr.error('Failed to update intern', 'Error')
+      error: (err) => {
+        this.toastr.error('Failed to update intern', 'Error');
+        console.error(err);
+      }
     });
   }
 
-  // Helper for UI badges
   getStatusClass(status: string): string {
     return status?.toLowerCase() === 'active' ? 'badge-active' : 'badge-inactive';
   }
