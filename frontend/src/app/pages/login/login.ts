@@ -3,15 +3,16 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth'; // Added service import
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule], // Required for form handling
-  templateUrl: './login.html', // Updated to match your file name
-  styleUrl: './login.css'      // Updated to match your file name
+  imports: [CommonModule, FormsModule],
+  templateUrl: './login.html',
+  styleUrl: './login.css'
 })
-export class Login {           // Updated class name to match your setup
+export class Login {
 
   email = '';
   password = '';
@@ -19,7 +20,8 @@ export class Login {           // Updated class name to match your setup
 
   constructor(
     private toastr: ToastrService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService // Injected AuthService
   ) { }
 
   onSubmit() {
@@ -28,19 +30,36 @@ export class Login {           // Updated class name to match your setup
       return;
     }
 
-    this.isLoading = true; // Show loading spinner
+    this.isLoading = true;
 
-    // Mock API call delay
-    setTimeout(() => {
-      this.isLoading = false;
+    // Prepare data to send to backend
+    const loginData = {
+      email: this.email,
+      password: this.password
+    };
 
-      // Temporary authentication check for UI testing
-      if (this.email === 'admin@test.com' && this.password === '123') {
+    // Call the Spring Boot backend
+    this.authService.login(loginData).subscribe({
+      next: (response) => {
+        this.isLoading = false;
         this.toastr.success('Welcome back to the dashboard!', 'Login Successful');
-        // this.router.navigate(['/admin/dashboard']); 
-      } else {
+
+        // Save user data to local storage
+        localStorage.setItem('user', JSON.stringify(response));
+
+        // Navigate to the admin dashboard after successful login
+        this.router.navigate(['/admin/dashboard']);
+      },
+
+      error: (error) => {
+        // Fixes the NG0100 Angular Error
+        setTimeout(() => {
+          this.isLoading = false;
+        });
+
         this.toastr.error('Invalid email or password. Please try again.', 'Authentication Failed');
+        console.error('Login error', error);
       }
-    }, 2000);
+    });
   }
 }
