@@ -1,7 +1,138 @@
-/* Keep all previous layout CSS (admin-layout, sidebar, topbar, etc.) above this */
+/* =========================================
+   1. MAIN LAYOUT
+========================================= */
+.admin-layout {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    background-color: #f8f9fa;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* =========================================
+   2. TOPBAR STYLES
+========================================= */
+.topbar {
+    height: 70px;
+    background: white;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f8f9fa;
+    padding: 10px 16px;
+    border-radius: 8px;
+    width: 300px;
+    border: 1px solid #e9ecef;
+}
+
+.search-bar input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+}
+
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    color: #495057;
+    position: relative;
+    cursor: pointer;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #dc3545;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #212529;
+}
+
+.user-role {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+/* =========================================
+   3. DASHBOARD CONTENT & CARDS
+========================================= */
+.content-wrapper {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
 
 .page-header {
     margin-bottom: 30px;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #212529;
+}
+
+.page-header p {
+    margin: 5px 0 0 0;
+    color: #6c757d;
+    font-size: 14px;
 }
 
 .stats-grid {
@@ -64,7 +195,7 @@
     color: #6c757d;
 }
 
-/* Danger Card (Red Theme for Overdue) */
+/* Danger Theme for Overdue Tasks */
 .stat-card.danger-card {
     background: linear-gradient(135deg, #f44336, #d32f2f);
     border: none;
@@ -81,7 +212,9 @@
     color: white;
 }
 
-/* Activity Feed */
+/* =========================================
+   4. ACTIVITY FEED
+========================================= */
 .activity-section {
     background: white;
     border-radius: 12px;
