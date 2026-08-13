@@ -5,8 +5,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-sidebar',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.css'
+  templateUrl: './sidebar.html',
+  styleUrl: './sidebar.css'
 })
 export class SidebarComponent {
 

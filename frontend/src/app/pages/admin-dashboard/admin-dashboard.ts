@@ -6,8 +6,8 @@ import { SidebarComponent } from '../../components/sidebar/sidebar'; // Import t
   selector: 'app-admin-dashboard',
   standalone: true,
   imports: [CommonModule, SidebarComponent], // Add it here
-  templateUrl: './admin-dashboard.component.html',
-  styleUrl: './admin-dashboard.component.css'
+  templateUrl: './admin-dashboard.html',
+  styleUrl: './admin-dashboard.css'
 })
 export class AdminDashboardComponent {
   isSidebarCollapsed = false;
