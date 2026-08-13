@@ -37,11 +37,14 @@ export class AdminDashboardComponent implements OnInit {
 
   // Extracts the logged-in user details saved during authentication
   loadRealUserData() {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      const user = JSON.parse(userStr);
-      this.userName = user.name;
-      this.userRole = user.role;
+    // Check if localStorage is available (Ensures it only runs in the browser, not on the server)
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        this.userName = user.name;
+        this.userRole = user.role;
+      }
     }
   }
 
