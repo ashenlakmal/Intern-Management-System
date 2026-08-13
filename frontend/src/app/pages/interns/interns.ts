@@ -21,7 +21,8 @@ export class Interns implements OnInit {
   isViewModalOpen = false;
 
   // Form objects
-  newIntern: any = { firstName: '', lastName: '', email: '', role: '', department: '', status: 'Active' };
+  // Updated object with 'designation' instead of 'role'
+  newIntern: any = { firstName: '', lastName: '', email: '', designation: 'Frontend Developer', department: '', status: 'Active' };
   selectedIntern: any = null;
   isEditMode = false;
 
@@ -44,7 +45,7 @@ export class Interns implements OnInit {
 
   // Add Modal logic
   openAddModal() {
-    this.newIntern = { firstName: '', lastName: '', email: '', role: '', department: '', status: 'Active' };
+    this.newIntern = { firstName: '', lastName: '', email: '', designation: 'Frontend Developer', department: '', status: 'Active' };
     this.isAddModalOpen = true;
   }
 
@@ -55,9 +56,12 @@ export class Interns implements OnInit {
   saveNewIntern() {
     this.internService.addIntern(this.newIntern).subscribe({
       next: (res) => {
-        this.toastr.success('New intern added successfully', 'Success');
-        this.loadInterns();
-        this.closeAddModal();
+        // setTimeout ensures Angular updates the UI state immediately
+        setTimeout(() => {
+          this.isAddModalOpen = false;
+          this.loadInterns();
+          this.toastr.success('New intern added successfully', 'Success');
+        });
       },
       error: (err) => this.toastr.error('Failed to add intern', 'Error')
     });
@@ -82,10 +86,12 @@ export class Interns implements OnInit {
   saveUpdatedIntern() {
     this.internService.updateIntern(this.selectedIntern.id, this.selectedIntern).subscribe({
       next: (res) => {
-        this.toastr.success('Intern details updated successfully', 'Success');
-        this.loadInterns();
-        this.isEditMode = false;
-        this.closeViewModal();
+        setTimeout(() => {
+          this.isEditMode = false;
+          this.isViewModalOpen = false;
+          this.loadInterns();
+          this.toastr.success('Intern details updated successfully', 'Success');
+        });
       },
       error: (err) => this.toastr.error('Failed to update intern', 'Error')
     });

@@ -28,6 +28,7 @@ public class User {
     private String role; // e.g., "ADMIN", "INTERN_FRONTEND", "INTERN_UIUX"
     private String status; // e.g., "Active", "Inactive"
     private String avatarInitials; // e.g., "SJ", "JS"
+    private String designation;
 
     private String department;
     private String managerName;

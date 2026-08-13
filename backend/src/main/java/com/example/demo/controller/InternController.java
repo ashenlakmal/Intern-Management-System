@@ -7,38 +7,39 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/interns")
-@CrossOrigin(origins = "*") // Allows Angular frontend to call these APIs
+@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class InternController {
 
     private final UserRepository userRepository;
 
-    // Fetch all interns from MongoDB
     @GetMapping
     public ResponseEntity<List<User>> getAllInterns() {
-        // In a real scenario, we might filter by role. Here we fetch all users for the
-        // management view.
-        List<User> interns = userRepository.findAll();
+        // STRICT FILTER: Only return users where role is exactly "INTERN"
+        // This automatically hides Admins and Supervisors from the table
+        List<User> interns = userRepository.findAll().stream()
+                .filter(user -> "INTERN".equalsIgnoreCase(user.getRole()))
+                .collect(Collectors.toList());
+
         return ResponseEntity.ok(interns);
     }
 
-    // Add a new intern to MongoDB
     @PostMapping
     public ResponseEntity<User> addIntern(@RequestBody User intern) {
-        // Auto-generate Avatar Initials based on first and last name
         String initials = "";
-        if (intern.getFirstName() != null && !intern.getFirstName().isEmpty()) {
+        if (intern.getFirstName() != null && !intern.getFirstName().isEmpty())
             initials += intern.getFirstName().substring(0, 1).toUpperCase();
-        }
-        if (intern.getLastName() != null && !intern.getLastName().isEmpty()) {
+        if (intern.getLastName() != null && !intern.getLastName().isEmpty())
             initials += intern.getLastName().substring(0, 1).toUpperCase();
-        }
         intern.setAvatarInitials(initials);
 
-        // Set default status if not provided
+        // ENTERPRISE RULE: Force the role to be "INTERN" always
+        intern.setRole("INTERN");
+
         if (intern.getStatus() == null || intern.getStatus().isEmpty()) {
             intern.setStatus("Active");
         }
@@ -47,16 +48,17 @@ public class InternController {
         return ResponseEntity.ok(savedIntern);
     }
 
-    // Update an existing intern in MongoDB
     @PutMapping("/{id}")
     public ResponseEntity<User> updateIntern(@PathVariable String id, @RequestBody User updatedData) {
         return userRepository.findById(id).map(existingUser -> {
             existingUser.setFirstName(updatedData.getFirstName());
             existingUser.setLastName(updatedData.getLastName());
             existingUser.setEmail(updatedData.getEmail());
-            existingUser.setRole(updatedData.getRole());
-            existingUser.setStatus(updatedData.getStatus());
+            existingUser.setDesignation(updatedData.getDesignation()); // Added Designation
             existingUser.setDepartment(updatedData.getDepartment());
+            existingUser.setStatus(updatedData.getStatus());
+            // Intentionally omitting setRole() to protect the INTERN role from being
+            // changed
 
             User savedUser = userRepository.save(existingUser);
             return ResponseEntity.ok(savedUser);

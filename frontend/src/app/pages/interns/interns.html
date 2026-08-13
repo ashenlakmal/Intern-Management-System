@@ -81,14 +81,14 @@
             <input type="email" [(ngModel)]="newIntern.email" placeholder="john.doe@company.com">
           </div>
           <div class="input-group">
-            <label>Role</label>
-            <select [(ngModel)]="newIntern.role">
-              <option value="Frontend Developer">Frontend Developer</option>
-              <option value="Backend Developer">Backend Developer</option>
-              <option value="UI/UX Designer">UI/UX Designer</option>
-              <option value="QA Engineer">QA Engineer</option>
-            </select>
-          </div>
+        <label>Designation</label>
+        <select [(ngModel)]="newIntern.designation">
+          <option value="Frontend Developer">Frontend Developer</option>
+          <option value="Backend Developer">Backend Developer</option>
+          <option value="UI/UX Designer">UI/UX Designer</option>
+          <option value="QA Engineer">QA Engineer</option>
+        </select>
+      </div>
           <div class="input-group">
             <label>Department</label>
             <input type="text" [(ngModel)]="newIntern.department" placeholder="e.g. Engineering">
@@ -131,9 +131,9 @@
           </div>
           
           <div class="info-row">
-            <span class="info-label">Role</span>
-            <span class="info-value" *ngIf="!isEditMode">{{ selectedIntern.role }}</span>
-            <select *ngIf="isEditMode" [(ngModel)]="selectedIntern.role" class="edit-input">
+            <span class="info-label">Designation</span>
+            <span class="info-value" *ngIf="!isEditMode">{{ selectedIntern.designation }}</span>
+            <select *ngIf="isEditMode" [(ngModel)]="selectedIntern.designation" class="edit-input">
               <option value="Frontend Developer">Frontend Developer</option>
               <option value="Backend Developer">Backend Developer</option>
               <option value="UI/UX Designer">UI/UX Designer</option>
