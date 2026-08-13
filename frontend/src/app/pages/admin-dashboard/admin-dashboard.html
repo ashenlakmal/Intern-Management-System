@@ -1,38 +1,107 @@
 <div class="admin-layout" [class.collapsed]="isSidebarCollapsed">
   
-  <!-- Use the reusable sidebar component here -->
-  <app-sidebar 
-    [activeMenu]="'dashboard'" 
-    (collapsedChange)="isSidebarCollapsed = $event">
-  </app-sidebar>
+  <app-sidebar [activeMenu]="'dashboard'" (collapsedChange)="isSidebarCollapsed = $event"></app-sidebar>
 
-  <!-- ================= MAIN CONTENT AREA ================= -->
   <main class="main-content">
     
     <!-- Topbar -->
     <header class="topbar">
-      <!-- (Keep the exact same Topbar code from the previous step here) -->
       <div class="search-bar">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         <input type="text" placeholder="Search">
       </div>
       <div class="topbar-actions">
+        <button class="icon-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span class="notification-badge">1</span>
+        </button>
         <div class="user-profile">
-          <img src="https://ui-avatars.com/api/?name=Sarah+Jenkins&background=dc3545&color=fff" alt="User" class="avatar">
+          <!-- Dynamic Avatar Generation using the real name -->
+          <img [src]="'https://ui-avatars.com/api/?name=' + userName + '&background=dc3545&color=fff'" alt="User" class="avatar">
           <div class="user-info">
-            <span class="user-name">Sarah Jenkins</span>
-            <span class="user-role">Admin</span>
+            <!-- Displays real database name -->
+            <span class="user-name">{{ userName }}</span>
+            <span class="user-role">{{ userRole }}</span>
           </div>
         </div>
       </div>
     </header>
 
+    <!-- Main Dashboard Content -->
     <div class="content-wrapper">
       <div class="page-header">
         <h1>Dashboard Overview</h1>
         <p>October 26, 2023</p>
       </div>
-    </div>
 
+      <!-- Statistics Cards -->
+      <div class="stats-grid">
+        
+        <div class="stat-card">
+          <div class="card-icon-wrapper"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#495057" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
+          <div class="card-value">{{ stats.activeInterns | number }}</div>
+          <div class="card-label">Active Interns</div>
+          <div class="card-trend text-success">+5% today</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="card-icon-wrapper"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#495057" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></div>
+          <div class="card-value">{{ stats.activeProjects | number }}</div>
+          <div class="card-label">Active Projects</div>
+          <div class="card-trend text-muted">4 new</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="card-icon-wrapper"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#495057" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
+          <div class="card-value">{{ stats.pendingTasks | number }}</div>
+          <div class="card-label">Pending Tasks</div>
+          <div class="card-trend text-muted">22 due soon</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="card-icon-wrapper"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#495057" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
+          <div class="card-value">{{ stats.completedTasks | number }}</div>
+          <div class="card-label">Completed Tasks</div>
+          <div class="card-trend text-muted">12% increase</div>
+        </div>
+
+        <!-- Overdue Tasks Card (Danger Theme) -->
+        <div class="stat-card danger-card">
+          <div class="card-icon-wrapper danger-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
+          <div class="card-value">{{ stats.overdueTasks | number }}</div>
+          <div class="card-label">Overdue Tasks</div>
+          <div class="card-trend text-white">Requires action</div>
+        </div>
+      </div>
+
+      <!-- Recent Activity Feed -->
+      <div class="activity-section">
+        <div class="activity-header">
+          <h2>Recent Activity Feed</h2>
+          <div class="filter-dropdown">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+            Filter
+          </div>
+        </div>
+        
+        <div class="activity-list">
+          <div class="activity-item" *ngFor="let activity of stats.recentActivities">
+            <div class="activity-icon">
+              <!-- Dynamically display icon based on status -->
+              <svg *ngIf="activity.status === 'Approved'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#212529" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              <svg *ngIf="activity.status === 'Completed'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#212529" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              <svg *ngIf="activity.status === 'Active'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#212529" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+              <svg *ngIf="activity.status === 'Overdue'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </div>
+            <div class="activity-content">
+              <strong>{{ activity.message.split(':')[0] }}:</strong> {{ activity.message.split(':')[1] }}
+            </div>
+            <div class="activity-time">{{ activity.timeAgo }}</div>
+            <div class="activity-status">Status: <span [ngClass]="getStatusClass(activity.status)">{{ activity.status }}</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </main>
 </div>
