@@ -1,0 +1,128 @@
+<div class="admin-layout" [class.collapsed]="isSidebarCollapsed">
+  <app-sidebar [activeMenu]="'projects'" (collapsedChange)="isSidebarCollapsed = $event"></app-sidebar>
+
+  <main class="main-content">
+    <div class="content-wrapper">
+      
+      <div class="page-header d-flex-between">
+        <div>
+          <h1>Project Management</h1>
+          <p class="breadcrumbs">Dashboard / <strong>Projects</strong></p>
+        </div>
+        <button class="btn-primary" (click)="openAddModal()">+ Create New Project</button>
+      </div>
+
+      <div class="toolbar d-flex-between">
+        <div class="search-bar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" placeholder="Search by project name..." [(ngModel)]="searchTerm">
+        </div>
+        
+        <div class="filter-group">
+          <button class="filter-btn" [class.active]="currentFilter === 'All'" (click)="setFilter('All')">All</button>
+          <button class="filter-btn" [class.active]="currentFilter === 'ACTIVE'" (click)="setFilter('ACTIVE')">Active</button>
+          <button class="filter-btn" [class.active]="currentFilter === 'ARCHIVED'" (click)="setFilter('ARCHIVED')">Archived</button>
+        </div>
+      </div>
+
+      <div class="projects-grid">
+        <div class="project-card" *ngFor="let proj of filteredProjects">
+          <div class="card-header d-flex-between">
+            <h3 class="project-title">{{ proj.name }}</h3>
+            <span class="status-badge" [ngClass]="getStatusClass(proj.status)">{{ proj.status }}</span>
+          </div>
+          
+          <p class="project-desc">{{ proj.description }}</p>
+          
+          <div class="tech-stack">
+            <strong>Tech Stack:</strong> 
+            <!-- Loops through the techStack Array! -->
+            <div class="tech-tags-container">
+              <span class="tech-badge" *ngFor="let tech of proj.techStack">{{ tech }}</span>
+              <span *ngIf="!proj.techStack || proj.techStack.length === 0" class="text-muted">None</span>
+            </div>
+          </div>
+
+          <div class="card-meta d-flex-between">
+            <div class="meta-item">
+              <span class="meta-label">Deadline:</span>
+              <span class="meta-value font-bold">{{ proj.deadline | date:'MMM dd, yyyy' }}</span>
+            </div>
+            <div class="meta-item text-right">
+              <span class="meta-label">Team IDs:</span>
+              <div class="avatar-group">
+                <!-- Shows initials of team IDs or dummy avatars if ID exists -->
+                <div class="avatar-mini bg-1" *ngFor="let id of proj.teamMemberIds | slice:0:3">ID</div>
+                <div class="avatar-mini bg-4" *ngIf="proj.teamMemberIds?.length > 3">+{{ proj.teamMemberIds.length - 3 }}</div>
+                <span *ngIf="!proj.teamMemberIds || proj.teamMemberIds.length === 0" class="text-muted" style="font-size: 12px;">Unassigned</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="progress-section d-flex-between">
+            <div class="progress-bar-container">
+              <div class="progress-fill" [style.width.%]="proj.progressPercentage"></div>
+            </div>
+            <span class="progress-text">{{ proj.progressPercentage }}%</span>
+            <button class="btn-outline" (click)="openEditModal(proj)">View Details</button>
+          </div>
+        </div>
+
+        <div class="empty-state" *ngIf="filteredProjects.length === 0">
+          <p>No projects found matching your criteria.</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Create/Edit Modal -->
+  <div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ isEditMode ? 'Edit Project' : 'Create New Project' }}</h2>
+        <button class="close-btn" (click)="closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="input-group full-width">
+            <label>Project Name *</label>
+            <input type="text" [(ngModel)]="currentProject.name" placeholder="e.g. Cloud Migration Platform">
+          </div>
+          <div class="input-group full-width">
+            <label>Description</label>
+            <textarea [(ngModel)]="currentProject.description" rows="3"></textarea>
+          </div>
+          <div class="input-group full-width">
+            <label>Tech Stack (Comma Separated)</label>
+            <input type="text" [(ngModel)]="techStackInput" placeholder="e.g. Angular, Spring Boot, AWS">
+          </div>
+          <div class="input-group full-width">
+            <label>Team Member IDs (Comma Separated)</label>
+            <input type="text" [(ngModel)]="teamMembersInput" placeholder="e.g. 647dc3e..., 647dc41...">
+          </div>
+          <div class="input-group">
+            <label>Deadline *</label>
+            <input type="date" [(ngModel)]="currentProject.deadline">
+          </div>
+          <div class="input-group">
+            <label>Status</label>
+            <select [(ngModel)]="currentProject.status">
+              <option value="ACTIVE">ACTIVE</option>
+              <option value="ARCHIVED">ARCHIVED</option>
+              <option value="DONE">DONE</option>
+            </select>
+          </div>
+          <div class="input-group full-width" *ngIf="isEditMode">
+            <label>Progress (%)</label>
+            <input type="number" [(ngModel)]="currentProject.progressPercentage" min="0" max="100">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeModal()">Cancel</button>
+        <button class="btn-primary" (click)="saveProject()">{{ isEditMode ? 'Save Changes' : 'Create Project' }}</button>
+      </div>
+    </div>
+  </div>
+</div>
