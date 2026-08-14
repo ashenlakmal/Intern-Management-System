@@ -173,5 +173,11 @@ export class Projects implements OnInit {
     });
   }
 
-
+  getStatusClass(status: string): string {
+    const s = status?.toLowerCase();
+    if (s === 'active') return 'badge-active';
+    if (s === 'done' || s === 'completed') return 'badge-done';
+    if (s === 'due' || s === 'archived') return 'badge-due';
+    return 'badge-active';
+  }
 }
