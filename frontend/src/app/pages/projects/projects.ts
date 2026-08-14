@@ -172,7 +172,6 @@ export class Projects implements OnInit {
       error: () => this.ngZone.run(() => this.toastr.error('Operation failed', 'Error'))
     });
   }
-
   getStatusClass(status: string): string {
     const s = status?.toLowerCase();
     if (s === 'active') return 'badge-active';
