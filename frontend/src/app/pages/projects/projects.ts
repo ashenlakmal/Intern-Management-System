@@ -3,6 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { ProjectService } from '../../services/project';
+import { InternService } from '../../services/intern'; // Added InternService!
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
@@ -15,6 +16,7 @@ import { ToastrService } from 'ngx-toastr';
 export class Projects implements OnInit {
   isSidebarCollapsed = false;
   projectsList: any[] = [];
+  allInterns: any[] = []; // Store all interns from database
 
   searchTerm: string = '';
   currentFilter: string = 'All';
@@ -23,12 +25,15 @@ export class Projects implements OnInit {
   isEditMode = false;
   currentProject: any = this.getEmptyProject();
 
-  // Temporary strings to handle form inputs before converting to Arrays
   techStackInput: string = '';
-  teamMembersInput: string = '';
+
+  // Custom Dropdown States
+  internSearchTerm: string = '';
+  showInternDropdown: boolean = false;
 
   constructor(
     private projectService: ProjectService,
+    private internService: InternService, // Injected InternService
     private toastr: ToastrService,
     private ngZone: NgZone,
     @Inject(PLATFORM_ID) private platformId: Object
@@ -37,22 +42,29 @@ export class Projects implements OnInit {
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
       this.loadProjects();
+      this.loadInterns(); // Fetch interns when page loads
     }
   }
 
-  // Updated to match your exact Spring Boot Model
   getEmptyProject() {
     return { name: '', description: '', techStack: [], teamMemberIds: [], deadline: '', progressPercentage: 0, status: 'ACTIVE' };
   }
 
   loadProjects() {
     this.projectService.getAllProjects().subscribe({
+      next: (data) => this.ngZone.run(() => this.projectsList = data),
+      error: (err) => console.error('Error loading projects', err)
+    });
+  }
+
+  loadInterns() {
+    this.internService.getAllInterns().subscribe({
       next: (data) => {
         this.ngZone.run(() => {
-          this.projectsList = data;
+          // Only get users who are Interns
+          this.allInterns = data.filter((u: any) => u.role === 'INTERN');
         });
-      },
-      error: (err) => console.error('Error loading projects', err)
+      }
     });
   }
 
@@ -68,13 +80,56 @@ export class Projects implements OnInit {
     this.currentFilter = filter;
   }
 
+  // --- ADVANCED TEAM MEMBER SELECTION LOGIC ---
+
+  // Get interns that match search and are NOT already selected
+  get availableInterns() {
+    let available = this.allInterns.filter(i => !this.currentProject.teamMemberIds.includes(i.id));
+
+    if (this.internSearchTerm) {
+      const term = this.internSearchTerm.toLowerCase();
+      available = available.filter(i =>
+        (i.firstName + ' ' + i.lastName).toLowerCase().includes(term) ||
+        i.email.toLowerCase().includes(term)
+      );
+    }
+    return available;
+  }
+
+  addTeamMember(intern: any) {
+    this.ngZone.run(() => {
+      if (!this.currentProject.teamMemberIds) this.currentProject.teamMemberIds = [];
+      this.currentProject.teamMemberIds.push(intern.id);
+      this.internSearchTerm = ''; // Clear search after adding
+      this.showInternDropdown = false; // Hide dropdown
+    });
+  }
+
+  removeTeamMember(id: any) {
+    this.ngZone.run(() => {
+      this.currentProject.teamMemberIds = this.currentProject.teamMemberIds.filter((i: any) => i !== id);
+    });
+  }
+
+  // Delay hiding dropdown so click events on items can register first
+  hideDropdownWithDelay() {
+    setTimeout(() => {
+      this.ngZone.run(() => this.showInternDropdown = false);
+    }, 200);
+  }
+
+  // Get full intern details using ID (used for UI display)
+  getInternDetails(id: any) {
+    return this.allInterns.find(i => i.id === id);
+  }
+
   // --- Modal Logic ---
   openAddModal() {
     this.ngZone.run(() => {
       this.isEditMode = false;
       this.currentProject = this.getEmptyProject();
       this.techStackInput = '';
-      this.teamMembersInput = '';
+      this.internSearchTerm = '';
       this.isModalOpen = true;
     });
   }
@@ -83,9 +138,9 @@ export class Projects implements OnInit {
     this.ngZone.run(() => {
       this.isEditMode = true;
       this.currentProject = { ...project };
-      // Convert arrays back to comma-separated strings for the form
+      if (!this.currentProject.teamMemberIds) this.currentProject.teamMemberIds = [];
       this.techStackInput = project.techStack ? project.techStack.join(', ') : '';
-      this.teamMembersInput = project.teamMemberIds ? project.teamMemberIds.join(', ') : '';
+      this.internSearchTerm = '';
       this.isModalOpen = true;
     });
   }
@@ -100,40 +155,23 @@ export class Projects implements OnInit {
       return;
     }
 
-    // Convert comma-separated string inputs into proper Arrays for the Database!
     this.currentProject.techStack = this.techStackInput.split(',').map(s => s.trim()).filter(s => s !== '');
-    this.currentProject.teamMemberIds = this.teamMembersInput.split(',').map(s => s.trim()).filter(s => s !== '');
 
-    if (this.isEditMode) {
-      this.projectService.updateProject(this.currentProject.id, this.currentProject).subscribe({
-        next: () => {
-          this.ngZone.run(() => {
-            this.isModalOpen = false;
-            this.toastr.success('Project updated successfully', 'Success');
-            this.loadProjects();
-          });
-        },
-        error: () => this.ngZone.run(() => this.toastr.error('Update failed', 'Error'))
-      });
-    } else {
-      this.projectService.addProject(this.currentProject).subscribe({
-        next: () => {
-          this.ngZone.run(() => {
-            this.isModalOpen = false;
-            this.toastr.success('Project created successfully', 'Success');
-            this.loadProjects();
-          });
-        },
-        error: () => this.ngZone.run(() => this.toastr.error('Creation failed', 'Error'))
-      });
-    }
+    const apiCall = this.isEditMode ?
+      this.projectService.updateProject(this.currentProject.id, this.currentProject) :
+      this.projectService.addProject(this.currentProject);
+
+    apiCall.subscribe({
+      next: () => {
+        this.ngZone.run(() => {
+          this.isModalOpen = false;
+          this.toastr.success(`Project ${this.isEditMode ? 'updated' : 'created'} successfully`, 'Success');
+          this.loadProjects();
+        });
+      },
+      error: () => this.ngZone.run(() => this.toastr.error('Operation failed', 'Error'))
+    });
   }
 
-  getStatusClass(status: string): string {
-    const s = status?.toLowerCase();
-    if (s === 'active') return 'badge-active';
-    if (s === 'done' || s === 'completed') return 'badge-done';
-    if (s === 'due' || s === 'archived') return 'badge-due';
-    return 'badge-active';
-  }
+
 }

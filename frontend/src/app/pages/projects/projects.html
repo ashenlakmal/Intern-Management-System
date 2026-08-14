@@ -25,6 +25,7 @@
         </div>
       </div>
 
+      <!-- Projects Grid -->
       <div class="projects-grid">
         <div class="project-card" *ngFor="let proj of filteredProjects">
           <div class="card-header d-flex-between">
@@ -36,24 +37,25 @@
           
           <div class="tech-stack">
             <strong>Tech Stack:</strong> 
-            <!-- Loops through the techStack Array! -->
             <div class="tech-tags-container">
               <span class="tech-badge" *ngFor="let tech of proj.techStack">{{ tech }}</span>
               <span *ngIf="!proj.techStack || proj.techStack.length === 0" class="text-muted">None</span>
             </div>
           </div>
 
+          <!-- Team Members Avatars loaded from DB -->
           <div class="card-meta d-flex-between">
             <div class="meta-item">
               <span class="meta-label">Deadline:</span>
               <span class="meta-value font-bold">{{ proj.deadline | date:'MMM dd, yyyy' }}</span>
             </div>
             <div class="meta-item text-right">
-              <span class="meta-label">Team IDs:</span>
+              <span class="meta-label">Team:</span>
               <div class="avatar-group">
-                <!-- Shows initials of team IDs or dummy avatars if ID exists -->
-                <div class="avatar-mini bg-1" *ngFor="let id of proj.teamMemberIds | slice:0:3">ID</div>
-                <div class="avatar-mini bg-4" *ngIf="proj.teamMemberIds?.length > 3">+{{ proj.teamMemberIds.length - 3 }}</div>
+                <div class="avatar-mini bg-1" *ngFor="let id of proj.teamMemberIds | slice:0:4" [title]="getInternDetails(id)?.firstName + ' ' + getInternDetails(id)?.lastName">
+                  {{ getInternDetails(id)?.avatarInitials || '?' }}
+                </div>
+                <div class="avatar-mini bg-4" *ngIf="proj.teamMemberIds?.length > 4">+{{ proj.teamMemberIds.length - 4 }}</div>
                 <span *ngIf="!proj.teamMemberIds || proj.teamMemberIds.length === 0" class="text-muted" style="font-size: 12px;">Unassigned</span>
               </div>
             </div>
@@ -76,7 +78,7 @@
     </div>
   </main>
 
-  <!-- Create/Edit Modal -->
+  <!-- Create/Edit Modal with Advanced Multi-Select -->
   <div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
@@ -97,10 +99,45 @@
             <label>Tech Stack (Comma Separated)</label>
             <input type="text" [(ngModel)]="techStackInput" placeholder="e.g. Angular, Spring Boot, AWS">
           </div>
+          
+          <!-- ADVANCED TEAM MEMBER SELECTOR -->
           <div class="input-group full-width">
-            <label>Team Member IDs (Comma Separated)</label>
-            <input type="text" [(ngModel)]="teamMembersInput" placeholder="e.g. 647dc3e..., 647dc41...">
+            <label>Assign Team Members</label>
+            
+            <!-- Display Selected Members as Tags -->
+            <div class="selected-members-container" *ngIf="currentProject.teamMemberIds?.length > 0">
+              <div class="member-tag" *ngFor="let id of currentProject.teamMemberIds">
+                <span class="member-tag-avatar">{{ getInternDetails(id)?.avatarInitials || '?' }}</span>
+                {{ getInternDetails(id)?.firstName }} {{ getInternDetails(id)?.lastName }}
+                <button class="remove-member-btn" (click)="removeTeamMember(id)">×</button>
+              </div>
+            </div>
+
+            <!-- Search Input and Dropdown -->
+            <div class="custom-dropdown-wrapper">
+              <input type="text" 
+                     class="dropdown-search-input"
+                     [(ngModel)]="internSearchTerm" 
+                     placeholder="Type to search & assign interns..." 
+                     (focus)="showInternDropdown = true"
+                     (blur)="hideDropdownWithDelay()">
+              
+              <div class="custom-dropdown-list" *ngIf="showInternDropdown">
+                <div class="dropdown-item" *ngFor="let intern of availableInterns" (click)="addTeamMember(intern)">
+                  <span class="dropdown-avatar">{{ intern.avatarInitials }}</span>
+                  <div class="dropdown-info">
+                    <strong>{{ intern.firstName }} {{ intern.lastName }}</strong>
+                    <span>{{ intern.designation }}</span>
+                  </div>
+                </div>
+                <div class="dropdown-item empty" *ngIf="availableInterns.length === 0">
+                  No interns found matching "{{ internSearchTerm }}"
+                </div>
+              </div>
+            </div>
           </div>
+          <!-- END ADVANCED SELECTOR -->
+
           <div class="input-group">
             <label>Deadline *</label>
             <input type="date" [(ngModel)]="currentProject.deadline">

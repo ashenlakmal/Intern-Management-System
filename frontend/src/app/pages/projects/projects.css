@@ -463,3 +463,134 @@
     font-weight: 600;
     border: 1px solid #dee2e6;
 }
+
+/* --- Advanced Team Selector Styles --- */
+.selected-members-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px dashed #ced4da;
+}
+
+.member-tag {
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 1px solid #ced4da;
+    padding: 4px 8px 4px 4px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #212529;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.member-tag-avatar {
+    background: #007bff;
+    color: white;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 9px;
+    font-weight: 700;
+    margin-right: 6px;
+}
+
+.remove-member-btn {
+    background: none;
+    border: none;
+    color: #adb5bd;
+    margin-left: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+}
+
+.remove-member-btn:hover {
+    color: #dc3545;
+}
+
+.custom-dropdown-wrapper {
+    position: relative;
+}
+
+.dropdown-search-input {
+    width: 100%;
+}
+
+.custom-dropdown-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    margin-top: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f3f5;
+    transition: background 0.2s;
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item:hover:not(.empty) {
+    background: #f8f9fa;
+}
+
+.dropdown-avatar {
+    background: #d32f2f;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 12px;
+    margin-right: 12px;
+}
+
+.dropdown-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.dropdown-info strong {
+    font-size: 14px;
+    color: #212529;
+}
+
+.dropdown-info span {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.dropdown-item.empty {
+    color: #6c757d;
+    font-size: 13px;
+    justify-content: center;
+    cursor: default;
+}
