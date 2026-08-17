@@ -1,0 +1,192 @@
+<div class="admin-layout" [class.collapsed]="isSidebarCollapsed">
+  <app-sidebar [activeMenu]="'tasks'" (collapsedChange)="isSidebarCollapsed = $event"></app-sidebar>
+
+  <main class="main-content">
+    <div class="content-wrapper">
+      
+      <div class="page-header d-flex-between">
+        <div>
+          <h1>Task Management</h1>
+          <p class="breadcrumbs">Dashboard / <strong>Tasks (Kanban)</strong></p>
+        </div>
+        <div class="header-actions">
+          <div class="search-bar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" placeholder="Search tasks..." [(ngModel)]="searchTerm">
+          </div>
+          <button class="btn-primary" (click)="openAddModal()">+ Create Task</button>
+        </div>
+      </div>
+
+      <!-- KANBAN BOARD -->
+      <div class="kanban-board">
+        
+        <!-- Column: TO DO -->
+        <div class="kanban-column">
+          <div class="column-header">
+            <h3>To Do <span class="task-count">{{ getTasksByStatus('TO_DO').length }}</span></h3>
+            <button class="add-quick-btn" (click)="openAddModal('TO_DO')">+</button>
+          </div>
+          <div class="task-cards-container">
+            <div class="task-card" *ngFor="let task of getTasksByStatus('TO_DO')" (click)="openEditModal(task)">
+              <div class="task-badges">
+                <span class="badge priority-badge" [ngClass]="getPriorityClass(task.priority)">{{ task.priority }}</span>
+                <span class="badge project-badge">{{ getProjectName(task.projectId) }}</span>
+              </div>
+              <h4 class="task-title">{{ task.title }}</h4>
+              <div class="task-footer">
+                <span class="task-date"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> {{ task.dueDate | date:'MMM dd' }}</span>
+                <div class="task-assignee" *ngIf="getAssignee(task.assigneeId) as assignee" [title]="assignee.firstName + ' ' + assignee.lastName">
+                  {{ assignee.avatarInitials }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column: IN PROGRESS -->
+        <div class="kanban-column">
+          <div class="column-header">
+            <h3>In Progress <span class="task-count">{{ getTasksByStatus('IN_PROGRESS').length }}</span></h3>
+            <button class="add-quick-btn" (click)="openAddModal('IN_PROGRESS')">+</button>
+          </div>
+          <div class="task-cards-container">
+            <div class="task-card" *ngFor="let task of getTasksByStatus('IN_PROGRESS')" (click)="openEditModal(task)">
+              <div class="task-badges">
+                <span class="badge priority-badge" [ngClass]="getPriorityClass(task.priority)">{{ task.priority }}</span>
+                <span class="badge project-badge">{{ getProjectName(task.projectId) }}</span>
+              </div>
+              <h4 class="task-title">{{ task.title }}</h4>
+              <div class="task-footer">
+                <span class="task-date"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> {{ task.dueDate | date:'MMM dd' }}</span>
+                <div class="task-assignee" *ngIf="getAssignee(task.assigneeId) as assignee" [title]="assignee.firstName + ' ' + assignee.lastName">
+                  {{ assignee.avatarInitials }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column: REVIEW -->
+        <div class="kanban-column">
+          <div class="column-header">
+            <h3>Review <span class="task-count">{{ getTasksByStatus('REVIEW').length }}</span></h3>
+            <button class="add-quick-btn" (click)="openAddModal('REVIEW')">+</button>
+          </div>
+          <div class="task-cards-container">
+            <div class="task-card" *ngFor="let task of getTasksByStatus('REVIEW')" (click)="openEditModal(task)">
+              <div class="task-badges">
+                <span class="badge priority-badge" [ngClass]="getPriorityClass(task.priority)">{{ task.priority }}</span>
+                <span class="badge project-badge">{{ getProjectName(task.projectId) }}</span>
+              </div>
+              <h4 class="task-title">{{ task.title }}</h4>
+              <div class="task-footer">
+                <span class="task-date"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> {{ task.dueDate | date:'MMM dd' }}</span>
+                <div class="task-assignee" *ngIf="getAssignee(task.assigneeId) as assignee" [title]="assignee.firstName + ' ' + assignee.lastName">
+                  {{ assignee.avatarInitials }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column: DONE -->
+        <div class="kanban-column">
+          <div class="column-header">
+            <h3>Done <span class="task-count">{{ getTasksByStatus('DONE').length }}</span></h3>
+            <button class="add-quick-btn" (click)="openAddModal('DONE')">+</button>
+          </div>
+          <div class="task-cards-container">
+            <div class="task-card done-card" *ngFor="let task of getTasksByStatus('DONE')" (click)="openEditModal(task)">
+              <div class="task-badges">
+                <span class="badge project-badge">{{ getProjectName(task.projectId) }}</span>
+              </div>
+              <h4 class="task-title" style="text-decoration: line-through; color: #adb5bd;">{{ task.title }}</h4>
+              <div class="task-footer">
+                <div class="task-assignee" *ngIf="getAssignee(task.assigneeId) as assignee">
+                  {{ assignee.avatarInitials }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Create/Edit Modal with DB Relationships -->
+  <div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ isEditMode ? 'Edit Task' : 'Create New Task' }}</h2>
+        <button class="close-btn" (click)="closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          
+          <div class="input-group full-width">
+            <label>Task Title *</label>
+            <input type="text" [(ngModel)]="currentTask.title" placeholder="e.g. Design Login Page">
+          </div>
+          
+          <div class="input-group full-width">
+            <label>Description</label>
+            <textarea [(ngModel)]="currentTask.description" rows="3"></textarea>
+          </div>
+          
+          <!-- Database Relational Dropdowns -->
+          <div class="input-group">
+            <label>Link to Project *</label>
+            <select [(ngModel)]="currentTask.projectId">
+              <option value="" disabled selected>Select a project...</option>
+              <option *ngFor="let proj of projectsList" [value]="proj.id">{{ proj.name }}</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>Assign Intern *</label>
+            <select [(ngModel)]="currentTask.assigneeId">
+              <option value="" disabled selected>Select an intern...</option>
+              <option *ngFor="let intern of internsList" [value]="intern.id">
+                {{ intern.firstName }} {{ intern.lastName }} ({{ intern.designation }})
+              </option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>Priority</label>
+            <select [(ngModel)]="currentTask.priority">
+              <option value="HIGH">High</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="LOW">Low</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>Status</label>
+            <select [(ngModel)]="currentTask.status">
+              <option value="TO_DO">To Do</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="REVIEW">Review</option>
+              <option value="DONE">Done</option>
+            </select>
+          </div>
+
+          <div class="input-group full-width">
+            <label>Due Date</label>
+            <input type="date" [(ngModel)]="currentTask.dueDate">
+          </div>
+          
+        </div>
+      </div>
+      <div class="modal-footer" [ngStyle]="{'justify-content': isEditMode ? 'space-between' : 'flex-end'}">
+        <button class="btn-danger-outline" *ngIf="isEditMode" (click)="deleteTask(currentTask.id)">Delete Task</button>
+        <div style="display: flex; gap: 12px;">
+          <button class="btn-secondary" (click)="closeModal()">Cancel</button>
+          <button class="btn-primary" (click)="saveTask()">{{ isEditMode ? 'Save Changes' : 'Create Task' }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
