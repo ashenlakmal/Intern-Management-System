@@ -1,7 +1,7 @@
-import { Component, OnInit, NgZone, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, NgZone, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
-import { AdminService } from '../../services/admin';
+import { AdminService } from '../../services/admin.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -18,7 +18,6 @@ export class AdminDashboardComponent implements OnInit {
   userRole: string = 'Role';
   avatarInitials: string = 'U';
 
-  // Dynamic Real Date
   currentDate: Date = new Date();
 
   stats: any = {
@@ -33,13 +32,18 @@ export class AdminDashboardComponent implements OnInit {
   constructor(
     private adminService: AdminService,
     private ngZone: NgZone,
+    private cdr: ChangeDetectorRef, // Added to strictly force UI updates
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
       this.loadRealUserData();
-      this.fetchDashboardStats();
+
+      // Delay fetching slightly to bypass SSR hydration block (The Ultimate Fix!)
+      setTimeout(() => {
+        this.fetchDashboardStats();
+      }, 150);
     }
   }
 
@@ -48,7 +52,6 @@ export class AdminDashboardComponent implements OnInit {
     if (userStr) {
       const user = JSON.parse(userStr);
       this.ngZone.run(() => {
-        // Handle name
         if (user.firstName && user.lastName) {
           this.userName = `${user.firstName} ${user.lastName}`;
         } else {
@@ -57,12 +60,12 @@ export class AdminDashboardComponent implements OnInit {
 
         this.userRole = user.role || 'Admin';
 
-        // Handle Avatar Initials
         if (user.avatarInitials) {
           this.avatarInitials = user.avatarInitials;
         } else if (user.firstName) {
           this.avatarInitials = user.firstName.substring(0, 1).toUpperCase();
         }
+        this.cdr.detectChanges(); // Force update profile info
       });
     }
   }
@@ -72,6 +75,7 @@ export class AdminDashboardComponent implements OnInit {
       next: (data) => {
         this.ngZone.run(() => {
           this.stats = data;
+          this.cdr.detectChanges(); // Force Angular to update the HTML cards immediately!
         });
       },
       error: (err) => console.error('Failed to load stats', err)
