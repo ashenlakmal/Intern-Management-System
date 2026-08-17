@@ -113,6 +113,4 @@ export class AdminDashboardComponent implements OnInit {
       activity.status.toLowerCase() === this.activityFilter.toLowerCase()
     );
   }
-
-
 }
