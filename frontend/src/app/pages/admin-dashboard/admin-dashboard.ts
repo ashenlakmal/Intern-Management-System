@@ -3,6 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { AdminService } from '../../services/admin';
+import { ThemeService } from '../../services/theme';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -39,6 +40,7 @@ export class AdminDashboardComponent implements OnInit {
     private adminService: AdminService,
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef,
+    public themeService: ThemeService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
@@ -111,4 +113,6 @@ export class AdminDashboardComponent implements OnInit {
       activity.status.toLowerCase() === this.activityFilter.toLowerCase()
     );
   }
+
+
 }
