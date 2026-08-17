@@ -27,10 +27,11 @@ export class AdminDashboardComponent implements OnInit {
     pendingTasks: 0,
     completedTasks: 0,
     overdueTasks: 0,
-    recentActivities: []
+    recentActivities: [],
+    recentProjects: [],
+    recentTasks: []
   };
 
-  // --- NEW: Filter Variables ---
   activityFilter: string = 'All';
   isFilterDropdownOpen: boolean = false;
 
@@ -93,14 +94,13 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
-  // --- NEW: Filter Logic ---
   toggleFilterDropdown() {
     this.isFilterDropdownOpen = !this.isFilterDropdownOpen;
   }
 
   setActivityFilter(filter: string) {
     this.activityFilter = filter;
-    this.isFilterDropdownOpen = false; // Close dropdown after selection
+    this.isFilterDropdownOpen = false;
   }
 
   get filteredActivities() {
