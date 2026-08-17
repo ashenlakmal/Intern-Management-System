@@ -1,12 +1,13 @@
 import { Component, OnInit, NgZone, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { AdminService } from '../../services/admin';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, SidebarComponent],
+  imports: [CommonModule, RouterModule, SidebarComponent],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css'
 })
