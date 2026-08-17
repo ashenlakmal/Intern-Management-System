@@ -80,27 +80,46 @@
       <div class="activity-section">
         <div class="activity-header">
           <h2>Recent Activity Feed</h2>
-          <div class="filter-dropdown">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
-            Filter
+          
+          <!-- Advanced Filter Dropdown -->
+          <div style="position: relative;">
+            <div class="filter-dropdown" (click)="toggleFilterDropdown()" [class.active]="isFilterDropdownOpen">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+              Filter: {{ activityFilter }}
+            </div>
+            
+            <!-- Custom Dropdown Menu -->
+            <div class="custom-filter-menu" *ngIf="isFilterDropdownOpen">
+              <div class="filter-item" (click)="setActivityFilter('All')">All Activities</div>
+              <div class="filter-item" (click)="setActivityFilter('Active')">Active</div>
+              <div class="filter-item" (click)="setActivityFilter('Completed')">Completed</div>
+              <div class="filter-item" (click)="setActivityFilter('Overdue')">Overdue</div>
+            </div>
           </div>
+
         </div>
         
         <div class="activity-list">
-          <div class="activity-item" *ngFor="let activity of stats.recentActivities">
+          <!-- Uses 'filteredActivities' instead of 'stats.recentActivities' -->
+          <div class="activity-item" *ngFor="let activity of filteredActivities">
             <div class="activity-icon">
-              <!-- Dynamically display icon based on status -->
               <svg *ngIf="activity.status === 'Approved'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#212529" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
               <svg *ngIf="activity.status === 'Completed'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#212529" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
               <svg *ngIf="activity.status === 'Active'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#212529" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
               <svg *ngIf="activity.status === 'Overdue'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
             </div>
             <div class="activity-content">
-              <strong>{{ activity.message.split(':')[0] }}:</strong> {{ activity.message.split(':')[1] }}
+              <strong>{{ activity.message.split(':')[0] }}:</strong> {{ activity.message.split(':')[1] || activity.message }}
             </div>
             <div class="activity-time">{{ activity.timeAgo }}</div>
             <div class="activity-status">Status: <span [ngClass]="getStatusClass(activity.status)">{{ activity.status }}</span></div>
           </div>
+
+          <!-- Empty State when filter yields no results -->
+          <div class="activity-item" *ngIf="filteredActivities.length === 0" style="justify-content: center; color: #6c757d; font-size: 14px; padding: 30px;">
+            No activities found for "{{ activityFilter }}".
+          </div>
+
         </div>
       </div>
 
