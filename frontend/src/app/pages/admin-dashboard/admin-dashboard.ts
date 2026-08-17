@@ -29,18 +29,20 @@ export class AdminDashboardComponent implements OnInit {
     recentActivities: []
   };
 
+  // --- NEW: Filter Variables ---
+  activityFilter: string = 'All';
+  isFilterDropdownOpen: boolean = false;
+
   constructor(
     private adminService: AdminService,
     private ngZone: NgZone,
-    private cdr: ChangeDetectorRef, // Added to strictly force UI updates
+    private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
       this.loadRealUserData();
-
-      // Delay fetching slightly to bypass SSR hydration block (The Ultimate Fix!)
       setTimeout(() => {
         this.fetchDashboardStats();
       }, 150);
@@ -57,15 +59,13 @@ export class AdminDashboardComponent implements OnInit {
         } else {
           this.userName = user.name || 'Admin';
         }
-
         this.userRole = user.role || 'Admin';
-
         if (user.avatarInitials) {
           this.avatarInitials = user.avatarInitials;
         } else if (user.firstName) {
           this.avatarInitials = user.firstName.substring(0, 1).toUpperCase();
         }
-        this.cdr.detectChanges(); // Force update profile info
+        this.cdr.detectChanges();
       });
     }
   }
@@ -75,7 +75,7 @@ export class AdminDashboardComponent implements OnInit {
       next: (data) => {
         this.ngZone.run(() => {
           this.stats = data;
-          this.cdr.detectChanges(); // Force Angular to update the HTML cards immediately!
+          this.cdr.detectChanges();
         });
       },
       error: (err) => console.error('Failed to load stats', err)
@@ -90,5 +90,24 @@ export class AdminDashboardComponent implements OnInit {
       case 'overdue': return 'status-overdue';
       default: return 'status-active';
     }
+  }
+
+  // --- NEW: Filter Logic ---
+  toggleFilterDropdown() {
+    this.isFilterDropdownOpen = !this.isFilterDropdownOpen;
+  }
+
+  setActivityFilter(filter: string) {
+    this.activityFilter = filter;
+    this.isFilterDropdownOpen = false; // Close dropdown after selection
+  }
+
+  get filteredActivities() {
+    if (!this.stats.recentActivities) return [];
+    if (this.activityFilter === 'All') return this.stats.recentActivities;
+
+    return this.stats.recentActivities.filter((activity: any) =>
+      activity.status.toLowerCase() === this.activityFilter.toLowerCase()
+    );
   }
 }
