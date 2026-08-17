@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, NgZone, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { AdminService } from '../../services/admin';
 
@@ -14,11 +14,13 @@ export class AdminDashboardComponent implements OnInit {
 
   isSidebarCollapsed = false;
 
-  // Real user data from LocalStorage
   userName: string = 'User';
   userRole: string = 'Role';
+  avatarInitials: string = 'U';
 
-  // Dashboard statistics object
+  // Dynamic Real Date
+  currentDate: Date = new Date();
+
   stats: any = {
     activeInterns: 0,
     activeProjects: 0,
@@ -28,44 +30,61 @@ export class AdminDashboardComponent implements OnInit {
     recentActivities: []
   };
 
-  constructor(private adminService: AdminService) { }
+  constructor(
+    private adminService: AdminService,
+    private ngZone: NgZone,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) { }
 
   ngOnInit() {
-    this.loadRealUserData();
-    this.fetchDashboardStats();
-  }
-
-  // Extracts the logged-in user details saved during authentication
-  loadRealUserData() {
-    // Check if localStorage is available (Ensures it only runs in the browser, not on the server)
-    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
-      const userStr = localStorage.getItem('user');
-      if (userStr) {
-        const user = JSON.parse(userStr);
-        this.userName = user.name;
-        this.userRole = user.role;
-      }
+    if (isPlatformBrowser(this.platformId)) {
+      this.loadRealUserData();
+      this.fetchDashboardStats();
     }
   }
 
-  // Calls the Spring Boot API to get real counts
+  loadRealUserData() {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      this.ngZone.run(() => {
+        // Handle name
+        if (user.firstName && user.lastName) {
+          this.userName = `${user.firstName} ${user.lastName}`;
+        } else {
+          this.userName = user.name || 'Admin';
+        }
+
+        this.userRole = user.role || 'Admin';
+
+        // Handle Avatar Initials
+        if (user.avatarInitials) {
+          this.avatarInitials = user.avatarInitials;
+        } else if (user.firstName) {
+          this.avatarInitials = user.firstName.substring(0, 1).toUpperCase();
+        }
+      });
+    }
+  }
+
   fetchDashboardStats() {
     this.adminService.getDashboardStats().subscribe({
       next: (data) => {
-        this.stats = data;
+        this.ngZone.run(() => {
+          this.stats = data;
+        });
       },
       error: (err) => console.error('Failed to load stats', err)
     });
   }
 
-  // Dynamic status color mapping for the activity feed
   getStatusClass(status: string): string {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case 'approved': return 'status-approved';
       case 'completed': return 'status-completed';
       case 'active': return 'status-active';
       case 'overdue': return 'status-overdue';
-      default: return '';
+      default: return 'status-active';
     }
   }
 }
