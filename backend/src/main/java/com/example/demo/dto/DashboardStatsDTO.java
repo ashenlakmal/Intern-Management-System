@@ -1,5 +1,7 @@
 package com.example.demo.dto;
 
+import com.example.demo.model.Project;
+import com.example.demo.model.Task;
 import lombok.Builder;
 import lombok.Data;
 import java.util.List;
@@ -13,4 +15,7 @@ public class DashboardStatsDTO {
     private long completedTasks;
     private long overdueTasks; // Added for the red card
     private List<ActivityLogDTO> recentActivities; // Added for the activity feed
+
+    private List<Project> recentProjects;
+    private List<Task> recentTasks;
 }
