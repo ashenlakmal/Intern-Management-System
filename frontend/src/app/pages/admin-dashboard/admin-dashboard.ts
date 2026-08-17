@@ -1,7 +1,7 @@
 import { Component, OnInit, NgZone, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
-import { AdminService } from '../../services/admin.service';
+import { AdminService } from '../../services/admin';
 
 @Component({
   selector: 'app-admin-dashboard',
