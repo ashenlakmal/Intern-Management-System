@@ -3,6 +3,7 @@ import { Login } from './pages/login/login';
 import { AdminDashboardComponent } from './pages/admin-dashboard/admin-dashboard';
 import { Interns } from './pages/interns/interns';
 import { Projects } from './pages/projects/projects';
+import { Tasks } from './pages/tasks/tasks';
 
 export const routes: Routes = [
     {
@@ -20,6 +21,10 @@ export const routes: Routes = [
     {
         path: 'admin/projects',
         component: Projects // Projects page route
+    },
+    {
+        path: 'admin/tasks',
+        component: Tasks // Tasks page route
     }
 
 ];
