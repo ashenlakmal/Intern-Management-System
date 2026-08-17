@@ -97,6 +97,15 @@ public class AdminService {
                                         .build());
                 }
 
+                // --- NEW: Fetch Recent Projects & Tasks for Cards ---
+                List<Project> sortedProjects = new ArrayList<>(allProjects);
+                Collections.reverse(sortedProjects);
+                List<Project> top3Projects = sortedProjects.stream().limit(3).toList();
+
+                List<Task> sortedTasks = new ArrayList<>(allTasks);
+                Collections.reverse(sortedTasks);
+                List<Task> top3Tasks = sortedTasks.stream().limit(3).toList();
+
                 return DashboardStatsDTO.builder()
                                 .activeInterns(activeInternsCount)
                                 .activeProjects(activeProjectsCount)
@@ -104,6 +113,9 @@ public class AdminService {
                                 .completedTasks(completedTasksCount)
                                 .overdueTasks(overdueTasksCount)
                                 .recentActivities(activities)
+                                // --- NEW DATA ---
+                                .recentProjects(top3Projects)
+                                .recentTasks(top3Tasks)
                                 .build();
         }
 }
