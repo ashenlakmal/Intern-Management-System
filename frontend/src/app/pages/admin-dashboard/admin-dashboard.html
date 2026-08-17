@@ -4,7 +4,7 @@
 
   <main class="main-content">
     
-<!-- Topbar -->
+    <!-- Topbar -->
     <header class="topbar">
       <div class="search-bar">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -16,7 +16,6 @@
           <span class="notification-badge">1</span>
         </button>
         <div class="user-profile">
-          <!-- Beautiful Avatar Circle -->
           <div style="width: 40px; height: 40px; border-radius: 50%; background: #dc3545; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px;">
             {{ avatarInitials }}
           </div>
@@ -32,13 +31,11 @@
     <div class="content-wrapper">
       <div class="page-header">
         <h1>Dashboard Overview</h1>
-        <!-- Dynamic Real Date Formatting -->
         <p>{{ currentDate | date:'MMMM dd, yyyy' }}</p>
       </div>
 
       <!-- Statistics Cards -->
       <div class="stats-grid">
-        
         <div class="stat-card">
           <div class="card-icon-wrapper"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#495057" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
           <div class="card-value">{{ stats.activeInterns | number }}</div>
@@ -67,7 +64,6 @@
           <div class="card-trend text-muted">12% increase</div>
         </div>
 
-        <!-- Overdue Tasks Card (Danger Theme) -->
         <div class="stat-card danger-card">
           <div class="card-icon-wrapper danger-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
           <div class="card-value">{{ stats.overdueTasks | number }}</div>
@@ -80,15 +76,12 @@
       <div class="activity-section">
         <div class="activity-header">
           <h2>Recent Activity Feed</h2>
-          
-          <!-- Advanced Filter Dropdown -->
           <div style="position: relative;">
             <div class="filter-dropdown" (click)="toggleFilterDropdown()" [class.active]="isFilterDropdownOpen">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
               Filter: {{ activityFilter }}
             </div>
             
-            <!-- Custom Dropdown Menu -->
             <div class="custom-filter-menu" *ngIf="isFilterDropdownOpen">
               <div class="filter-item" (click)="setActivityFilter('All')">All Activities</div>
               <div class="filter-item" (click)="setActivityFilter('Active')">Active</div>
@@ -96,11 +89,9 @@
               <div class="filter-item" (click)="setActivityFilter('Overdue')">Overdue</div>
             </div>
           </div>
-
         </div>
         
         <div class="activity-list">
-          <!-- Uses 'filteredActivities' instead of 'stats.recentActivities' -->
           <div class="activity-item" *ngFor="let activity of filteredActivities">
             <div class="activity-icon">
               <svg *ngIf="activity.status === 'Approved'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#212529" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -114,13 +105,14 @@
             <div class="activity-time">{{ activity.timeAgo }}</div>
             <div class="activity-status">Status: <span [ngClass]="getStatusClass(activity.status)">{{ activity.status }}</span></div>
           </div>
-
-          <!-- Empty State when filter yields no results -->
+          
           <div class="activity-item" *ngIf="filteredActivities.length === 0" style="justify-content: center; color: #6c757d; font-size: 14px; padding: 30px;">
             No activities found for "{{ activityFilter }}".
           </div>
+        </div>
+      </div>
 
-          <!-- ================= RECENT PROJECTS SECTION ================= -->
+      <!-- ================= RECENT PROJECTS SECTION ================= -->
       <div class="quick-overview-section mt-4">
         <div class="section-header d-flex-between">
           <h2>Recent Projects</h2>
@@ -141,6 +133,7 @@
               </div>
             </div>
           </div>
+          
           <div class="empty-mini-card" *ngIf="!stats.recentProjects || stats.recentProjects.length === 0">
             No recent projects found.
           </div>
@@ -166,11 +159,10 @@
               <span class="text-muted"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> {{ task.dueDate | date:'MMM dd' }}</span>
             </div>
           </div>
+          
           <div class="empty-mini-card" *ngIf="!stats.recentTasks || stats.recentTasks.length === 0">
             No recent tasks found.
           </div>
-        </div>
-      </div>
         </div>
       </div>
 
