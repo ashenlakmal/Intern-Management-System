@@ -1,6 +1,7 @@
 import { Component, OnInit, NgZone, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { TaskService } from '../../services/task';
 import { ProjectService } from '../../services/project';
@@ -10,7 +11,7 @@ import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-tasks',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarComponent],
+  imports: [CommonModule, FormsModule, SidebarComponent, DragDropModule],
   templateUrl: './tasks.html',
   styleUrl: './tasks.css'
 })
@@ -20,6 +21,11 @@ export class Tasks implements OnInit {
   tasksList: any[] = [];
   projectsList: any[] = [];
   internsList: any[] = [];
+
+  todoTasks: any[] = [];
+  inProgressTasks: any[] = [];
+  reviewTasks: any[] = [];
+  doneTasks: any[] = [];
 
   searchTerm: string = '';
 
@@ -47,11 +53,11 @@ export class Tasks implements OnInit {
   }
 
   loadAllData() {
-    this.internService.getAllInterns().subscribe(data => {
+    this.internService.getAllInterns().subscribe((data: any) => {
       this.ngZone.run(() => this.internsList = data.filter((u: any) => u.role === 'INTERN'));
     });
 
-    this.projectService.getAllProjects().subscribe(data => {
+    this.projectService.getAllProjects().subscribe((data: any) => {
       this.ngZone.run(() => this.projectsList = data);
     });
 
@@ -60,23 +66,60 @@ export class Tasks implements OnInit {
 
   loadTasks() {
     this.taskService.getAllTasks().subscribe({
-      next: (data) => this.ngZone.run(() => this.tasksList = data),
-      error: (err) => console.error('Error loading tasks', err)
+      next: (data: any) => {
+        this.ngZone.run(() => {
+          this.tasksList = data;
+          this.distributeTasks();
+        });
+      },
+      error: (err: any) => console.error('Error loading tasks', err)
     });
   }
 
-  get filteredTasks() {
-    if (!this.searchTerm) return this.tasksList;
-    const term = this.searchTerm.toLowerCase();
-    return this.tasksList.filter(t => t.title?.toLowerCase().includes(term));
+  onSearchChange() {
+    this.distributeTasks();
   }
 
-  // Group tasks for Kanban Board
-  getTasksByStatus(status: string) {
-    return this.filteredTasks.filter(t => t.status === status);
+  distributeTasks() {
+    let tasksToProcess = this.tasksList;
+
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      tasksToProcess = this.tasksList.filter(t => t.title?.toLowerCase().includes(term));
+    }
+
+    this.todoTasks = tasksToProcess.filter(t => t.status === 'TO_DO');
+    this.inProgressTasks = tasksToProcess.filter(t => t.status === 'IN_PROGRESS');
+    this.reviewTasks = tasksToProcess.filter(t => t.status === 'REVIEW');
+    this.doneTasks = tasksToProcess.filter(t => t.status === 'DONE');
   }
 
-  // Mappers for UI display
+  drop(event: CdkDragDrop<any[]>, newStatus: string) {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex,
+      );
+
+      const movedTask = event.container.data[event.currentIndex];
+      movedTask.status = newStatus;
+
+      this.taskService.updateTask(movedTask.id, movedTask).subscribe({
+        next: () => {
+          // Status updated successfully in backend
+        },
+        error: () => {
+          this.toastr.error('Failed to update task status automatically');
+          this.loadTasks();
+        }
+      });
+    }
+  }
+
   getProjectName(projectId: string): string {
     const proj = this.projectsList.find(p => p.id === projectId);
     return proj ? proj.name : 'No Project';
@@ -86,7 +129,6 @@ export class Tasks implements OnInit {
     return this.internsList.find(i => i.id === assigneeId) || null;
   }
 
-  // Modal Actions
   openAddModal(defaultStatus: string = 'TO_DO') {
     this.ngZone.run(() => {
       this.isEditMode = false;
@@ -144,7 +186,6 @@ export class Tasks implements OnInit {
     }
   }
 
-  // Helpers
   getPriorityClass(priority: string) {
     if (priority === 'HIGH') return 'priority-high';
     if (priority === 'MEDIUM') return 'priority-medium';
