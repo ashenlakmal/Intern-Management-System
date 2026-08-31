@@ -1,1 +1,119 @@
-<p>settings works!</p>
+<div class="admin-layout" [class.collapsed]="isSidebarCollapsed">
+  <app-sidebar [activeMenu]="'settings'" (collapsedChange)="isSidebarCollapsed = $event"></app-sidebar>
+
+  <main class="main-content">
+    
+    <header class="topbar">
+      <div class="search-bar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" placeholder="Search settings...">
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" (click)="themeService.toggleTheme()">
+          <svg *ngIf="!themeService.isDark" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          <svg *ngIf="themeService.isDark" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        </button>
+        <div class="user-profile">
+          <div class="avatar-circle">{{ userProfile.avatarInitials }}</div>
+          <div class="user-info">
+            <span class="user-name">{{ userProfile.firstName }} {{ userProfile.lastName }}</span>
+            <span class="user-role">{{ userProfile.role }}</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-wrapper">
+      <div class="page-header">
+        <h1>System Settings</h1>
+        <p>Manage your account settings, appearance, and security preferences.</p>
+      </div>
+
+      <div class="settings-grid">
+        
+        <div class="settings-card">
+          <div class="card-header">
+            <h2>Personal Information</h2>
+            <p>Update your personal details and how they appear in the system.</p>
+          </div>
+          <div class="card-body">
+            <div class="profile-preview">
+              <div class="avatar-circle large">{{ userProfile.avatarInitials }}</div>
+              <div>
+                <h3>{{ userProfile.firstName }} {{ userProfile.lastName }}</h3>
+                <span class="role-badge">{{ userProfile.role }}</span>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="input-group">
+                <label>First Name</label>
+                <input type="text" [(ngModel)]="userProfile.firstName">
+              </div>
+              <div class="input-group">
+                <label>Last Name</label>
+                <input type="text" [(ngModel)]="userProfile.lastName">
+              </div>
+            </div>
+            <div class="input-group full-width">
+              <label>Email Address</label>
+              <input type="email" [(ngModel)]="userProfile.email">
+            </div>
+          </div>
+          <div class="card-footer">
+            <button class="btn-primary" (click)="saveProfile()">Save Changes</button>
+          </div>
+        </div>
+
+        <div class="settings-column">
+          <div class="settings-card">
+            <div class="card-header">
+              <h2>Appearance</h2>
+              <p>Customize the system theme across all devices.</p>
+            </div>
+            <div class="card-body appearance-body">
+              <div class="theme-option">
+                <div class="theme-info">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                  <div>
+                    <h4>Dark Mode</h4>
+                    <p>Enable dark theme globally.</p>
+                  </div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" [checked]="themeService.isDark" (change)="themeService.toggleTheme()">
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card mt-20">
+            <div class="card-header">
+              <h2>Security</h2>
+              <p>Update your password to keep your account secure.</p>
+            </div>
+            <div class="card-body">
+              <div class="input-group full-width">
+                <label>Current Password</label>
+                <input type="password" [(ngModel)]="passwords.current" placeholder="Enter current password">
+              </div>
+              <div class="input-group full-width">
+                <label>New Password</label>
+                <input type="password" [(ngModel)]="passwords.new" placeholder="Enter new password">
+              </div>
+              <div class="input-group full-width">
+                <label>Confirm New Password</label>
+                <input type="password" [(ngModel)]="passwords.confirm" placeholder="Confirm new password">
+              </div>
+            </div>
+            <div class="card-footer">
+              <button class="btn-primary" (click)="updatePassword()">Update Password</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
