@@ -55,10 +55,28 @@
                 <input type="text" [(ngModel)]="userProfile.lastName">
               </div>
             </div>
+
             <div class="input-group full-width">
-              <label>Email Address</label>
-              <input type="email" [(ngModel)]="userProfile.email">
+              <label>Email Address <span style="color: #dc3545; font-size: 11px;">(Cannot be changed)</span></label>
+              <input type="email" [(ngModel)]="userProfile.email" readonly class="readonly-input">
             </div>
+
+            <div class="form-row">
+              <div class="input-group">
+                <label>Designation</label>
+                <input type="text" [(ngModel)]="userProfile.designation" placeholder="e.g. Senior Developer">
+              </div>
+              <div class="input-group">
+                <label>Department</label>
+                <input type="text" [(ngModel)]="userProfile.department" placeholder="e.g. Engineering">
+              </div>
+            </div>
+
+            <div class="input-group full-width">
+              <label>Skills (Comma Separated)</label>
+              <input type="text" [(ngModel)]="skillsInput" placeholder="e.g. Java, Angular, MongoDB">
+            </div>
+
           </div>
           <div class="card-footer">
             <button class="btn-primary" (click)="saveProfile()">Save Changes</button>
