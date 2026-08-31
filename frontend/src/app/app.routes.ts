@@ -4,6 +4,7 @@ import { AdminDashboardComponent } from './pages/admin-dashboard/admin-dashboard
 import { Interns } from './pages/interns/interns';
 import { Projects } from './pages/projects/projects';
 import { Tasks } from './pages/tasks/tasks';
+import { Settings } from './pages/settings/settings';
 
 export const routes: Routes = [
     {
@@ -25,6 +26,10 @@ export const routes: Routes = [
     {
         path: 'admin/tasks',
         component: Tasks // Tasks page route
+    },
+    {
+        path: 'admin/settings',
+        component: Settings // Settings page route
     }
 
 ];
