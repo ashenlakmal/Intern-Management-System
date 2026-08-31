@@ -17,6 +17,13 @@ public class UserController {
 
     private final UserRepository userRepository;
 
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable String id) {
+        return userRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PutMapping("/{id}/profile")
     public ResponseEntity<User> updateProfile(@PathVariable String id, @RequestBody ProfileUpdateRequest request) {
         return userRepository.findById(id).map(user -> {
@@ -50,19 +57,19 @@ public class UserController {
             return ResponseEntity.ok().body("{\"message\": \"Password updated successfully\"}");
         }).orElse(ResponseEntity.notFound().build());
     }
-}
 
-@Data
-class ProfileUpdateRequest {
-    private String firstName;
-    private String lastName;
-    private String designation;
-    private String department;
-    private List<String> skills;
-}
+    @Data
+    public static class ProfileUpdateRequest {
+        private String firstName;
+        private String lastName;
+        private String designation;
+        private String department;
+        private List<String> skills;
+    }
 
-@Data
-class PasswordChangeRequest {
-    private String currentPassword;
-    private String newPassword;
+    @Data
+    public static class PasswordChangeRequest {
+        private String currentPassword;
+        private String newPassword;
+    }
 }
