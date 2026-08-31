@@ -48,11 +48,11 @@
             <div class="form-row">
               <div class="input-group">
                 <label>First Name</label>
-                <input type="text" [(ngModel)]="userProfile.firstName">
+                <input type="text" [(ngModel)]="userProfile.firstName" autocomplete="off">
               </div>
               <div class="input-group">
                 <label>Last Name</label>
-                <input type="text" [(ngModel)]="userProfile.lastName">
+                <input type="text" [(ngModel)]="userProfile.lastName" autocomplete="off">
               </div>
             </div>
 
@@ -64,17 +64,17 @@
             <div class="form-row">
               <div class="input-group">
                 <label>Designation</label>
-                <input type="text" [(ngModel)]="userProfile.designation" placeholder="e.g. Senior Developer">
+                <input type="text" [(ngModel)]="userProfile.designation" placeholder="e.g. Senior Developer" autocomplete="off">
               </div>
               <div class="input-group">
                 <label>Department</label>
-                <input type="text" [(ngModel)]="userProfile.department" placeholder="e.g. Engineering">
+                <input type="text" [(ngModel)]="userProfile.department" placeholder="e.g. Engineering" autocomplete="off">
               </div>
             </div>
 
             <div class="input-group full-width">
               <label>Skills (Comma Separated)</label>
-              <input type="text" [(ngModel)]="skillsInput" placeholder="e.g. Java, Angular, MongoDB">
+              <input type="text" [(ngModel)]="skillsInput" placeholder="e.g. Java, Angular, MongoDB" autocomplete="off">
             </div>
 
           </div>
@@ -114,15 +114,15 @@
             <div class="card-body">
               <div class="input-group full-width">
                 <label>Current Password</label>
-                <input type="password" [(ngModel)]="passwords.current" placeholder="Enter current password">
+                <input type="password" [(ngModel)]="passwords.current" placeholder="Enter current password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');">
               </div>
               <div class="input-group full-width">
                 <label>New Password</label>
-                <input type="password" [(ngModel)]="passwords.new" placeholder="Enter new password">
+                <input type="password" [(ngModel)]="passwords.new" placeholder="Enter new password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');">
               </div>
               <div class="input-group full-width">
                 <label>Confirm New Password</label>
-                <input type="password" [(ngModel)]="passwords.confirm" placeholder="Confirm new password">
+                <input type="password" [(ngModel)]="passwords.confirm" placeholder="Confirm new password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');">
               </div>
             </div>
             <div class="card-footer">
