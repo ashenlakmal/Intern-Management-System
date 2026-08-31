@@ -348,3 +348,15 @@ input:checked+.slider:before {
 .slider.round:before {
     border-radius: 50%;
 }
+
+.readonly-input {
+    background: var(--hover-bg, #e9ecef) !important;
+    color: var(--text-muted, #6c757d) !important;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.readonly-input:focus {
+    border-color: var(--border-color, #ced4da) !important;
+    box-shadow: none !important;
+}
