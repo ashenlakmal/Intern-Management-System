@@ -1,8 +1,9 @@
-import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID, NgZone } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
-import { ThemeService } from '../../services/theme';
+import { ThemeService } from '../../services/theme.service';
+import { UserService } from '../../services/user.service';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
@@ -14,14 +15,19 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class Settings implements OnInit {
   isSidebarCollapsed = false;
+  userId: string = '';
 
   userProfile = {
     firstName: '',
     lastName: '',
     email: '',
-    role: 'ADMIN',
-    avatarInitials: 'U'
+    role: '',
+    avatarInitials: '',
+    designation: '',
+    department: ''
   };
+
+  skillsInput: string = '';
 
   passwords = {
     current: '',
@@ -31,7 +37,9 @@ export class Settings implements OnInit {
 
   constructor(
     public themeService: ThemeService,
+    private userService: UserService,
     private toastr: ToastrService,
+    private ngZone: NgZone,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
@@ -45,29 +53,60 @@ export class Settings implements OnInit {
     const userStr = localStorage.getItem('user');
     if (userStr) {
       const user = JSON.parse(userStr);
-      this.userProfile.firstName = user.firstName || 'Sarah';
-      this.userProfile.lastName = user.lastName || 'Jenkins';
-      this.userProfile.email = user.email || 'admin@internhub.com';
-      this.userProfile.role = user.role || 'ADMIN';
+      this.userId = user.id || user._id;
 
-      if (user.avatarInitials) {
-        this.userProfile.avatarInitials = user.avatarInitials;
-      } else if (this.userProfile.firstName) {
-        this.userProfile.avatarInitials = this.userProfile.firstName.substring(0, 1).toUpperCase();
+      this.userProfile.firstName = user.firstName || '';
+      this.userProfile.lastName = user.lastName || '';
+      this.userProfile.email = user.email || '';
+      this.userProfile.role = user.role || '';
+      this.userProfile.designation = user.designation || '';
+      this.userProfile.department = user.department || '';
+      this.userProfile.avatarInitials = user.avatarInitials || 'U';
+
+      if (user.skills && Array.isArray(user.skills)) {
+        this.skillsInput = user.skills.join(', ');
       }
     }
   }
 
   saveProfile() {
-    if (!this.userProfile.firstName || !this.userProfile.lastName || !this.userProfile.email) {
-      this.toastr.warning('Please fill all required fields.', 'Validation Error');
+    if (!this.userProfile.firstName || !this.userProfile.lastName) {
+      this.toastr.warning('First Name and Last Name are required.', 'Validation Error');
       return;
     }
 
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('user', JSON.stringify(this.userProfile));
+    if (!this.userId) {
+      this.toastr.error('User ID not found. Cannot update profile.', 'Error');
+      return;
     }
-    this.toastr.success('Profile information updated successfully.', 'Success');
+
+    const skillsArray = this.skillsInput.split(',').map(s => s.trim()).filter(s => s !== '');
+
+    const updateData = {
+      firstName: this.userProfile.firstName,
+      lastName: this.userProfile.lastName,
+      designation: this.userProfile.designation,
+      department: this.userProfile.department,
+      skills: skillsArray
+    };
+
+    this.userService.updateProfile(this.userId, updateData).subscribe({
+      next: (updatedUser) => {
+        this.ngZone.run(() => {
+          if (isPlatformBrowser(this.platformId)) {
+            const currentStorage = JSON.parse(localStorage.getItem('user') || '{}');
+            const newStorage = { ...currentStorage, ...updatedUser };
+            localStorage.setItem('user', JSON.stringify(newStorage));
+            this.loadUserProfile();
+          }
+          this.toastr.success('Profile updated in database successfully.', 'Success');
+        });
+      },
+      error: (err) => {
+        this.ngZone.run(() => this.toastr.error('Failed to update profile.', 'Database Error'));
+        console.error(err);
+      }
+    });
   }
 
   updatePassword() {
@@ -81,7 +120,32 @@ export class Settings implements OnInit {
       return;
     }
 
-    this.toastr.success('Password updated successfully.', 'Security Updated');
-    this.passwords = { current: '', new: '', confirm: '' };
+    if (!this.userId) {
+      this.toastr.error('User ID not found.', 'Error');
+      return;
+    }
+
+    const payload = {
+      currentPassword: this.passwords.current,
+      newPassword: this.passwords.new
+    };
+
+    this.userService.changePassword(this.userId, payload).subscribe({
+      next: () => {
+        this.ngZone.run(() => {
+          this.toastr.success('Password securely updated in database.', 'Security Updated');
+          this.passwords = { current: '', new: '', confirm: '' };
+        });
+      },
+      error: (err) => {
+        this.ngZone.run(() => {
+          if (err.status === 400) {
+            this.toastr.error('The current password you entered is incorrect.', 'Authentication Failed');
+          } else {
+            this.toastr.error('Failed to change password.', 'Error');
+          }
+        });
+      }
+    });
   }
 }
