@@ -2,8 +2,8 @@ import { Component, OnInit, Inject, PLATFORM_ID, NgZone } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
-import { ThemeService } from '../../services/theme';
-import { UserService } from '../../services/user';
+import { ThemeService } from '../../services/theme.service';
+import { UserService } from '../../services/user.service';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
@@ -52,19 +52,32 @@ export class Settings implements OnInit {
   loadUserProfile() {
     const userStr = localStorage.getItem('user');
     if (userStr) {
-      const user = JSON.parse(userStr);
-      this.userId = user.id || user._id;
+      const localUser = JSON.parse(userStr);
+      this.userId = localUser.id || localUser._id;
 
-      this.userProfile.firstName = user.firstName || '';
-      this.userProfile.lastName = user.lastName || '';
-      this.userProfile.email = user.email || '';
-      this.userProfile.role = user.role || '';
-      this.userProfile.designation = user.designation || '';
-      this.userProfile.department = user.department || '';
-      this.userProfile.avatarInitials = user.avatarInitials || 'U';
+      if (this.userId) {
+        this.userService.getUserById(this.userId).subscribe({
+          next: (dbUser) => {
+            this.ngZone.run(() => {
+              this.userProfile.firstName = dbUser.firstName || '';
+              this.userProfile.lastName = dbUser.lastName || '';
+              this.userProfile.email = dbUser.email || '';
+              this.userProfile.role = dbUser.role || '';
+              this.userProfile.designation = dbUser.designation || '';
+              this.userProfile.department = dbUser.department || '';
+              this.userProfile.avatarInitials = dbUser.avatarInitials || 'U';
 
-      if (user.skills && Array.isArray(user.skills)) {
-        this.skillsInput = user.skills.join(', ');
+              if (dbUser.skills && Array.isArray(dbUser.skills)) {
+                this.skillsInput = dbUser.skills.join(', ');
+              } else {
+                this.skillsInput = '';
+              }
+
+              localStorage.setItem('user', JSON.stringify(dbUser));
+            });
+          },
+          error: (err) => console.error('Failed to load fresh user data', err)
+        });
       }
     }
   }
@@ -93,12 +106,7 @@ export class Settings implements OnInit {
     this.userService.updateProfile(this.userId, updateData).subscribe({
       next: (updatedUser) => {
         this.ngZone.run(() => {
-          if (isPlatformBrowser(this.platformId)) {
-            const currentStorage = JSON.parse(localStorage.getItem('user') || '{}');
-            const newStorage = { ...currentStorage, ...updatedUser };
-            localStorage.setItem('user', JSON.stringify(newStorage));
-            this.loadUserProfile();
-          }
+          localStorage.setItem('user', JSON.stringify(updatedUser));
           this.toastr.success('Profile updated in database successfully.', 'Success');
         });
       },
