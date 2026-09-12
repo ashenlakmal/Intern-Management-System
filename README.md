@@ -1,1 +1,1 @@
-# Intern-Management-System
+# Intern Management System
